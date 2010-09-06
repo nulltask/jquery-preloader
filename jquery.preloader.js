@@ -15,8 +15,8 @@
  *		<script>
  *			jQuery(function($)
  *			{
- *				// $(window).bind() style event dispatching
- *				$(window)
+ *				// bind() style event dispatching
+ *				$('#preloaderTarget')
  *					.bind('preloadstart', function() { console.log('preloadstart'); })
  *					.bind('preloadready', function() { console.log('preloadready'); })
  *					.bind('preloadprogress', function() { console.log('preloadprogress'); })
@@ -63,45 +63,55 @@
 
 	$.fn.preloader = function(initObject)
 	{
-		var imgList = [];
+		var that = this;
+		var elementList = [];
 		var loaded = 0;
+		var total = 0;
+		var startTime = new Date() - 0;
 		
 		var onPreloadStart = initObject.onPreloadStart || function(event, data) { console.log('start'); };
 		var atPreloadReady = initObject.atPreloadReady || function(event, data) { console.log(['ready', data]); };
 		var atPreloadProgress = initObject.atPreloadProgress || function(event, data) { console.log(['progress', data]); };
 		var onPreloadComplete = initObject.onPreloadComplete || function(event, data) { console.log('complete'); };
+		var onElementInit = initObject.onElementInit || function(elem) { console.log('elementinit'); };
+		var onElementLoad = initObject.onElementLoad || function(event, data) { console.log('elementload');  };
 		var $placeholder = $('<div>').css({ position: "absolute", top: -1, left: -1, width: 1, height: 1, overflow: "hidden" });
 
-		var preload = function($target)
+		var preload = function()
 		{
-			$(window)
+			$(that)
 				.bind('preloadstart', onPreloadStart)
 				.bind('preloadready', atPreloadReady)
 				.bind('preloadprogress', atPreloadProgress)
 				.bind('preloadcomplete', onPreloadComplete)
 			;
-			$(window).trigger('preloadstart');
+			$(that).trigger('preloadstart');
 			
-			$placeholder.appendTo('body');
-			$target.find('img').each(function() { imgList.push($(this).attr('src')); });
-			$(window).trigger('preloadready', [{ total: imgList.length }]);
-			$.each(imgList, function(index, src)
+			var $img = that.find('img');
+			total = $img.length;
+			$(that).trigger('preloadready', [{ total: total }]);
+			$img.each(function()
 			{
-				$('<img>').load(loadCallback).attr('src', src).appendTo($placeholder);
+				onElementInit($(this));
+				$(this)
+					.load(loadCallback)
+					.load(onElementLoad)
+					.attr('src', $(this).attr('src'))
+				;
+
 			});
 		};
 		var loadCallback = function(event, data)
 		{
 			loaded++;
-			$(window).trigger('preloadprogress', [{current: loaded, total: imgList.length}]);
+			$(that).trigger('preloadprogress', [{current: loaded, total: total, elapsed: new Date() - startTime}]);
 
-			if (loaded >= imgList.length)
+			if (loaded >= total)
 			{
-				$placeholder.remove();
-				$(window).trigger('preloadcomplete', []);
+				$(that).trigger('preloadcomplete', [{ total: total, elapsed: new Date() - startTime }]);
 			}
 		};
 
-		preload(this);
+		preload();
 	};
 })(jQuery);
