@@ -1,5 +1,5 @@
 /**
- * jQuery Preloader v0.1 - http://rd.uniba.jp/
+ * jQuery Preloader v0.1pre - http://rd.uniba.jp/
  * 
  * Copyright 2010, Uniba Inc.
  * Released under the BSD License.
@@ -64,7 +64,6 @@
 	$.fn.preloader = function(initObject)
 	{
 		var that = this;
-		var elementList = [];
 		var loaded = 0;
 		var total = 0;
 		var startTime = new Date() - 0;
@@ -75,7 +74,6 @@
 		var onPreloadComplete = initObject.onPreloadComplete || function(event, data) { console.log('complete'); };
 		var onElementInit = initObject.onElementInit || function(elem) { console.log('elementinit'); };
 		var onElementLoad = initObject.onElementLoad || function(event, data) { console.log('elementload');  };
-		var $placeholder = $('<div>').css({ position: "absolute", top: -1, left: -1, width: 1, height: 1, overflow: "hidden" });
 
 		var preload = function()
 		{
