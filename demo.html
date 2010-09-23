@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+        <title>jQuery Preloader Demo</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="jquery.preloader.js"></script>
+        <script>
+		if (!window.console) window.console = { log: function() { } };
+
+                jQuery(function($)
+                {
+                        // bind() style event dispatching
+                        $('#preloaderTarget')
+                                .bind('preloadstart', function() { console.log('preloadstart'); })
+                                .bind('preloadready', function() { console.log('preloadready'); })
+                                .bind('preloadprogress', function() { console.log('preloadprogress'); })
+                                .bind('preloadcomplete', function() { console.log('preloadcomplete'); })
+                        ;
+
+                        // initObject style event dispatching
+                        $('#preloaderTarget').preloader({
+                                onPreloadStart: function(event, data)
+                                {
+                                        console.log('start');
+                                },
+                                atPreloadReady: function(event, data)
+                                {
+                                        console.log('number of preload target is ' + data.total);
+                                        data.elements
+						.css({ width: '250px', opacity: 0, verticalAlign: 'bottom' })
+						.wrap($('<div />', { 'class': 'imageContainer', css: { width: '240px', backgroundColor: '#eee', display: 'inline-block', float: 'left', padding: '10px', margin: '10px' } }))
+						.wrap($('<div />', { 'class': 'imageWrapper', css: { overflow: 'hidden' } }))
+					;
+					data.elements.parents('.imageWrapper').animate({ height: 'toggle' }, 0);
+                                },
+                                atPreloadProgress: function(event, data)
+                                {
+                                        console.log(['loading... ' + data.current + ' of ' + data.total, data.element.attr('src')]);
+					data.element.parents('.imageWrapper').animate({ height: 'toggle' }, 333, 'swing', function() { data.element.animate({ opacity: 1 }, 666) });
+					
+                                },
+                                onPreloadComplete: function(event, data)
+                                {
+                                        console.log('complete');
+                                }
+                        });
+                });
+        </script>
+</head>
+<body>
+        <div id="preloaderTarget">
+                <!-- sample image taken from IE9 test drive page - http://ie.microsoft.com/testdrive/HTML5/87DOMContent-Loaded/Default.html -->
+                <img src="http://ie.microsoft.com/testdrive/HTML5/87DOMContent-Loaded/whidbey.jpg" />
+                <img src="http://ie.microsoft.com/testdrive/HTML5/87DOMContent-Loaded/window.jpg" />
+                <img src="http://ie.microsoft.com/testdrive/HTML5/87DOMContent-Loaded/whidbey2.jpg" />
+        </div>
+</body>
+</html>
+
+
